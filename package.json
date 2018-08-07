@@ -1,0 +1,9 @@
+{
+  "name": "map",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "leaflet": "^1.3.3"
+  }
+}
