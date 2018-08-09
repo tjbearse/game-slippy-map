@@ -10,12 +10,12 @@ TileSize=256
 
 def main():
     hexMap = 'mapParts/exports/zoom1-0.0-16x16.png'
-    size = (4096, 4096)
+    size = (2048, 2048)
     tileDim = map(lambda x: x/TileSize, size)
     if not os.path.exists("temp"):
         os.makedirs("temp")
-    nZoom=4
-    for z in range(nZoom-1):
+    nZoom=3
+    for z in range(nZoom):
         w, h = createZoomLevel(hexMap, z, tileDim[0], tileDim[1], nZoom-1-z)
         if z==0:
             print "bounds: [[-{}*{}, 0], [0, {}*{}]],".format(w, TileSize, h, TileSize)
