@@ -9,7 +9,7 @@ import os
 TileSize=256
 
 def main():
-    hexMap = 'mapParts/exports/zoom1-0.0-16x16.png'
+    hexMap = 'mapParts/exports/z2-hexmap-2048x2048.png'
     size = (2048, 2048)
     tileDim = map(lambda x: x/TileSize, size)
     if not os.path.exists("temp"):
