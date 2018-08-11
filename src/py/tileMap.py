@@ -84,8 +84,7 @@ def calcCropParams(size, inTileOffsetPx, scaleRelativeToImage):
     return prescaleSize, tileSizeToImage, tileDim
 
 def getRelativeScale(z, baseZoom):
-    p = baseZoom - z
-    return 2**(p)
+    return getGlobalScale(baseZoom) / getGlobalScale(z)
 
 def getZooms(base, n):
     return range(base-n+1, base+1)
@@ -103,13 +102,13 @@ def crop(imgIn, imgOut, prescaleSize, tileSizeToImage):
         '-extent', preSize,
         # crop to tile content in final tile
         '+gravity', '-crop', crop,
-        # resample large tiles to reg tile size
-        '-resize', tileSize,
-        # extend partials to full tile size
+        # extend partials to full crop size
         '-background', FillBackground,
         '-compose', 'Copy',
         '-gravity', 'NorthWest',
-        '-extent', tileSize,
+        '-extent', crop,
+        # resample large tiles to reg tile size
+        '-resize', tileSize,
         imgOut
     ])
 

@@ -155,23 +155,23 @@ class TestCrop(unittest.TestCase):
         outImg = 'temp/zoom2-%d.png'
         background = tileMap.FillBackground
         preSize = np.array([512,513])
-        tileMap.crop(img, outImg, preSize, 256)
+        tileMap.crop(img, outImg, preSize, 1024)
         check_call.assert_called_with([
             'convert', img,
-            # pre-extend for in-tile offset
+            #
             '-background', background,
             '-compose', 'Copy',
             '-gravity', 'SouthEast',
             '-extent', '512x513',
-            # crop to tile content in final tile
-            '+gravity', '-crop', '256x256',
-            # resample large tiles to reg tile size
-            '-resize', '256x256',
-            # extend partials to full tile size
+            #
+            '+gravity', '-crop', '1024x1024',
+            #
             '-background', background,
             '-compose', 'Copy',
             '-gravity', 'NorthWest',
-            '-extent', '256x256',
+            '-extent', '1024x1024',
+            #
+            '-resize', '256x256',
             outImg
         ])
 
