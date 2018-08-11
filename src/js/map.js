@@ -24,18 +24,20 @@ var MySimple = L.Util.extend({}, L.CRS.Simple, {
     },
 });
 
-
-
 var map = L.map('map', {
     // TODO setup size and wrapping
     // may need my own crs? https://leafletjs.com/reference-1.3.2.html#crs-wraplng
     // this would also allow for skipping zoom layers / customizing the level
-    crs: MySimple
+    crs: MySimple,
 }).setView([-1*tileSize, 1*tileSize], 0);
+L.control.mapCenterCoord().addTo(map);
 var imgUrl = 'tile.png';
 var tileLayer = L.tileLayer('layers/{z}/{x}.{y}.png', {
     // determined by how much we generate
     bounds: [[-2*tileSize,0], [0, 2*tileSize]],
-    minZoom: 0,
-    maxZoom: 3
+    minZoom: -1,
+    maxZoom: 6,
+    // maxZoom: 4,
+    maxNativeZoom: 5,
+    // minNativeZoom: 0
 }).addTo(map);

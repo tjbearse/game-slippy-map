@@ -1,0 +1,15 @@
+{
+    "maps": {
+        "mapParts/exports/z2-hexmap-2048x2048.png": {
+            "size": [2048, 2048],
+            "baseZoom": 2,
+            "zoomLevels": 3,
+            "topLeft": [0, 0]
+        },
+        "mapParts/exports/dungeonDrawing.png": {
+            "size": [512, 1024],
+            "baseZoom": 5,
+            "zoomLevels": 2
+        }
+    }
+}
