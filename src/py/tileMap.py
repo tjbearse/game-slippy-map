@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 import json
 import math
+import numpy as np
 import os
 import subprocess
 import sys
 
 TileSize=256
+FillBackground='rgba(0,0,0,0)'
 
 config = {
     "zoom": {
@@ -26,28 +28,60 @@ config = {
         # 7: 2**(2*7),# 125
     },
 }
-# TODO:
-#   - Add offset functionality
+
+"""
+config details:
+    size:	w,h of the image in pixels
+    baseZoom:	most zoomed level the image will be tiled to
+    zoomLevels: number of zoom levels to count up from base (includes base)
+    topLeft:	global coordinate of the top left corner of the image
+"""
+
 def main():
     config = readConfig()
     if not os.path.exists("temp"):
         os.makedirs("temp")
     for f, v in config['maps'].items():
-        size = v['size']
+        size = np.array(v['size'])
         baseZoom = v['baseZoom']
         zoomLevels = v['zoomLevels']
+        topLeft = mapCoordToImgCoord(np.array(v['topLeft']))
+        print(topLeft)
 
-        nX, nY = getTileCount(TileSize, size)
         for z in getZooms(baseZoom, zoomLevels):
-            s = getRelativeScale(z, baseZoom)
-            crop(f, s, z)
-            n, w, h = scaleWidthHeight(nX, nY, s)
-            moveToDirs(n, w, z)
+            tileOffset, inTileOffsetPx = scaleRelativeToGlobal(topLeft, z)
 
-def getTileCount(tileSize, picSize):
-    x = max(math.ceil(picSize[0] / float(tileSize)), 1)
-    y = max(math.ceil(picSize[1] / float(tileSize)), 1)
-    return x, y
+            scaleRelativeToImage = getRelativeScale(z, baseZoom)
+            resize, rescaleTile, tileDim = calcCropParams(size, inTileOffsetPx, scaleRelativeToImage)
+            print("z:{}, n:{}, o:{}".format(z, tileDim, tileOffset))
+
+            imgOut = "temp/zoom{}-%d.png".format(z)
+            crop(f, imgOut, resize, rescaleTile)
+            moveToDirs(tileDim, tileOffset, z)
+
+# map is LatLng, imgs are x,y with y increasing as it goes down
+def mapCoordToImgCoord(coord):
+    return np.array([coord[1], -coord[0]])
+    
+
+def scaleRelativeToGlobal(globalOffet, z):
+    # rel to layer pixels after tiling (256 size)
+    scaleRelativeToGlobal = getGlobalScale(z)
+    layerOffsetPx = globalOffet * scaleRelativeToGlobal # FIXME cant mult this type, numpy?
+    tileOffset = np.floor(layerOffsetPx / TileSize)
+    inTileOffsetPx = layerOffsetPx % TileSize
+    return tileOffset, inTileOffsetPx
+
+# this number times a global coordinate should give a pixel coordinate
+def getGlobalScale(zoom):
+    return 2**(zoom)
+
+def calcCropParams(size, inTileOffsetPx, scaleRelativeToImage):
+    topLeftExtraToImage = inTileOffsetPx * scaleRelativeToImage
+    prescaleSize = size + topLeftExtraToImage
+    tileSizeToImage = 256 * scaleRelativeToImage
+    tileDim = np.ceil(prescaleSize / tileSizeToImage)
+    return prescaleSize, tileSizeToImage, tileDim
 
 def getRelativeScale(z, baseZoom):
     p = baseZoom - z
@@ -56,34 +90,38 @@ def getRelativeScale(z, baseZoom):
 def getZooms(base, n):
     return range(base-n+1, base+1)
 
-def scaleWidthHeight(widthN, heightN, s):
-    w=max(math.ceil(widthN/s), 1)
-    h=max(math.ceil(heightN/s), 1)
-    n=w*h
-    return n,w,h
-
-def crop(img, s, zoom):
-    f = "temp/zoom{}-%d.png".format(zoom)
-    w=s*256
-    crop="{}x{}".format(w,w)
+def crop(imgIn, imgOut, prescaleSize, tileSizeToImage):
+    preSize="{}x{}".format(*prescaleSize)
+    crop="{0}x{0}".format(tileSizeToImage)
+    tileSize="{0}x{0}".format(TileSize)
     subprocess.check_call([
-        "convert", img, "+gravity",
-        "-crop", crop,
-        "-resize", "256x256",
-        "-background", "rgba(0,0,0,0)",
-        "-compose", "Copy",
-        "-gravity", "NorthWest",
-        "-extent", "256x256",
-        f
+        'convert', imgIn,
+        # pre-extend for in-tile offset
+        '-background', FillBackground,
+        '-compose', 'Copy',
+        '-gravity', 'SouthEast',
+        '-extent', preSize,
+        # crop to tile content in final tile
+        '+gravity', '-crop', crop,
+        # resample large tiles to reg tile size
+        '-resize', tileSize,
+        # extend partials to full tile size
+        '-background', FillBackground,
+        '-compose', 'Copy',
+        '-gravity', 'NorthWest',
+        '-extent', tileSize,
+        imgOut
     ])
 
-def moveToDirs(N, w, z):
+def moveToDirs(dim, offset, z):
+    w,h = int(dim[0]), int(dim[1])
+    xOffset, yOffset = int(offset[0]), int(offset[1])
     zdir = "layers/{}".format(z)
     if not os.path.exists(zdir):
         os.makedirs(zdir)
-    for n in range(N):
-        y=int(n/w)
-        x=int(n%w)
+    for n in range(w*h):
+        y=int(n/w) + yOffset
+        x=int(n%w) + xOffset
         fin = "temp/zoom{}-{}.png".format(z, n)
         fout = "{}/{}.{}.png".format(zdir,x,y)
         os.rename(fin, fout)

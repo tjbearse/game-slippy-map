@@ -9,7 +9,8 @@
         "mapParts/exports/dungeonDrawing.png": {
             "size": [512, 1024],
             "baseZoom": 5,
-            "zoomLevels": 2
+            "zoomLevels": 2,
+            "topLeft": [-256, 256]
         }
     }
 }

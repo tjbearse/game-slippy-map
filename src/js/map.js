@@ -30,7 +30,14 @@ var map = L.map('map', {
     // this would also allow for skipping zoom layers / customizing the level
     crs: MySimple,
 }).setView([-1*tileSize, 1*tileSize], 0);
-L.control.mapCenterCoord().addTo(map);
+
+L.control.mapCenterCoord({
+    position: 'topright',
+    onMove: true,
+    // TODO make this function list hex names too
+    latLngFormatter: (y,x) => y + ", " + x,
+}).addTo(map);
+
 var imgUrl = 'tile.png';
 var tileLayer = L.tileLayer('layers/{z}/{x}.{y}.png', {
     // determined by how much we generate
