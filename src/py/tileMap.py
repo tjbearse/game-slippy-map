@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import json
 import math
-import numpy as np
 import os
 import subprocess
 import sys
@@ -22,7 +21,7 @@ config = {
         2: 2**(2*2),  # 64k   (hexMap original)
         3: 2**(2*3),  # 16k   (hexMap native)
 
-        # 4: 2**(2*4),# 8k  
+        # 4: 2**(2*4),# 8k
         # 5: 2**(2*5),# 2k
         # 6: 2**(2*6),# 500
         # 7: 2**(2*7),# 125
@@ -42,10 +41,10 @@ def main():
     if not os.path.exists("temp"):
         os.makedirs("temp")
     for f, v in config['maps'].items():
-        size = np.array(v['size'])
+        size = v['size']
         baseZoom = v['baseZoom']
         zoomLevels = v['zoomLevels']
-        topLeft = mapCoordToImgCoord(np.array(v['topLeft']))
+        topLeft = mapCoordToImgCoord(v['topLeft'])
         print(topLeft)
 
         for z in getZooms(baseZoom, zoomLevels):
@@ -61,26 +60,25 @@ def main():
 
 # map is LatLng, imgs are x,y with y increasing as it goes down
 def mapCoordToImgCoord(coord):
-    return np.array([coord[1], -coord[0]])
-    
+    return [coord[1], -coord[0]]
 
 def scaleRelativeToGlobal(globalOffet, z):
     # rel to layer pixels after tiling (256 size)
     scaleRelativeToGlobal = getGlobalScale(z)
-    layerOffsetPx = globalOffet * scaleRelativeToGlobal # FIXME cant mult this type, numpy?
-    tileOffset = np.floor(layerOffsetPx / TileSize)
-    inTileOffsetPx = layerOffsetPx % TileSize
+    layerOffsetPx = lmap(lambda x:x * scaleRelativeToGlobal, globalOffet)
+    tileOffset = lmap(lambda x:math.floor(x / TileSize), layerOffsetPx)
+    inTileOffsetPx = lmap(lambda x:x % TileSize, layerOffsetPx)
     return tileOffset, inTileOffsetPx
 
 # this number times a global coordinate should give a pixel coordinate
 def getGlobalScale(zoom):
-    return 2**(zoom)
+    return 2.0**(zoom)
 
 def calcCropParams(size, inTileOffsetPx, scaleRelativeToImage):
-    topLeftExtraToImage = inTileOffsetPx * scaleRelativeToImage
-    prescaleSize = size + topLeftExtraToImage
+    topLeftExtraToImage = lmap(lambda x:x * scaleRelativeToImage, inTileOffsetPx)
+    prescaleSize = lmap(sum, zip(size, topLeftExtraToImage))
     tileSizeToImage = 256 * scaleRelativeToImage
-    tileDim = np.ceil(prescaleSize / tileSizeToImage)
+    tileDim = lmap(lambda x:math.ceil(x/tileSizeToImage), prescaleSize)
     return prescaleSize, tileSizeToImage, tileDim
 
 def getRelativeScale(z, baseZoom):
@@ -125,11 +123,13 @@ def moveToDirs(dim, offset, z):
         fout = "{}/{}.{}.png".format(zdir,x,y)
         os.rename(fin, fout)
 
+def lmap(*arg):
+    return list(map(*arg))
+
 def readConfig():
     f = sys.argv[1]
     with open(f, 'r') as fp:
         return json.load(fp)
-    
 
 if __name__=="__main__":
     main()

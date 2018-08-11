@@ -1,124 +1,123 @@
 import unittest
 from unittest.mock import patch, call
-import numpy as np
 import tileMap
 
 
 class TestScaleRelativeToGlobal(unittest.TestCase):
     def test_zoomZeroEven(self):
-        topLeft = np.array([256, 512])
+        topLeft = [256, 512]
         tileOffset, inTileOffsetPx = tileMap.scaleRelativeToGlobal(topLeft, 0)
-        np.testing.assert_array_equal(tileOffset, np.array([1,2]), "tile offset")
-        np.testing.assert_array_equal(inTileOffsetPx, np.array([0,0]), "px offset")
+        self.assertEqual(tileOffset, [1,2], "tile offset")
+        self.assertEqual(inTileOffsetPx, [0,0], "px offset")
 
     def test_zoomZeroRound(self):
-        topLeft = np.array([257, 520])
+        topLeft = [257, 520]
         tileOffset, inTileOffsetPx = tileMap.scaleRelativeToGlobal(topLeft, 0)
-        np.testing.assert_array_equal(tileOffset, np.array([1,2]), "tile offset")
-        np.testing.assert_array_equal(inTileOffsetPx, np.array([1,8]), "px offset")
+        self.assertEqual(tileOffset, [1,2], "tile offset")
+        self.assertEqual(inTileOffsetPx, [1,8], "px offset")
 
     def test_zoomZeroNegativeEven(self):
-        topLeft = np.array([-256, -512])
+        topLeft = [-256, -512]
         tileOffset, inTileOffsetPx = tileMap.scaleRelativeToGlobal(topLeft, 0)
-        np.testing.assert_array_equal(tileOffset, np.array([-1,-2]), "tile offset")
-        np.testing.assert_array_equal(inTileOffsetPx, np.array([0,0]), "px offset")
+        self.assertEqual(tileOffset, [-1,-2], "tile offset")
+        self.assertEqual(inTileOffsetPx, [0,0], "px offset")
 
     def test_zoomZeroNegativeRound(self):
-        topLeft = np.array([-257, -511])
+        topLeft = [-257, -511]
         tileOffset, inTileOffsetPx = tileMap.scaleRelativeToGlobal(topLeft, 0)
-        np.testing.assert_array_equal(tileOffset, np.array([-2,-2]), "tile offset")
-        np.testing.assert_array_equal(inTileOffsetPx, np.array([255,1]), "px offset")
+        self.assertEqual(tileOffset, [-2,-2], "tile offset")
+        self.assertEqual(inTileOffsetPx, [255,1], "px offset")
 
     def test_zoomOneEven(self):
-        topLeft = np.array([256, 512])
+        topLeft = [256, 512]
         tileOffset, inTileOffsetPx = tileMap.scaleRelativeToGlobal(topLeft, 1)
-        np.testing.assert_array_equal(tileOffset, np.array([2,4]), "tile offset")
-        np.testing.assert_array_equal(inTileOffsetPx, np.array([0,0]), "px offset")
+        self.assertEqual(tileOffset, [2,4], "tile offset")
+        self.assertEqual(inTileOffsetPx, [0,0], "px offset")
 
     def test_zoomOneRound(self):
-        topLeft = np.array([257, 520])
+        topLeft = [257, 520]
         tileOffset, inTileOffsetPx = tileMap.scaleRelativeToGlobal(topLeft, 1)
-        np.testing.assert_array_equal(tileOffset, np.array([2,4]), "tile offset")
-        np.testing.assert_array_equal(inTileOffsetPx, np.array([2,16]), "px offset")
+        self.assertEqual(tileOffset, [2,4], "tile offset")
+        self.assertEqual(inTileOffsetPx, [2,16], "px offset")
 
     def test_zoomOneNegativeEven(self):
-        topLeft = np.array([-256, -512])
+        topLeft = [-256, -512]
         tileOffset, inTileOffsetPx = tileMap.scaleRelativeToGlobal(topLeft, 1)
-        np.testing.assert_array_equal(tileOffset, np.array([-2,-4]), "tile offset")
-        np.testing.assert_array_equal(inTileOffsetPx, np.array([0,0]), "px offset")
+        self.assertEqual(tileOffset, [-2,-4], "tile offset")
+        self.assertEqual(inTileOffsetPx, [0,0], "px offset")
 
     def test_zoomOneNegativeRound(self):
-        topLeft = np.array([-257, -511])
+        topLeft = [-257, -511]
         tileOffset, inTileOffsetPx = tileMap.scaleRelativeToGlobal(topLeft, 1)
-        np.testing.assert_array_equal(tileOffset, np.array([-3,-4]), "tile offset")
-        np.testing.assert_array_equal(inTileOffsetPx, np.array([254,2]), "px offset")
+        self.assertEqual(tileOffset, [-3,-4], "tile offset")
+        self.assertEqual(inTileOffsetPx, [254,2], "px offset")
 
 class TestCalcCropParams(unittest.TestCase):
     def test_scale1_noprescale_even(self):
-        size = np.array([256, 512])
-        pxOffset = np.array([0, 0])
+        size = [256, 512]
+        pxOffset = [0, 0]
         scale = 1
         #
         prescaleSize, tileSizeToImage, tileDim = tileMap.calcCropParams(size, pxOffset, scale)
         #
         self.assertEqual(tileSizeToImage, 256)
-        np.testing.assert_array_equal(prescaleSize, np.array([256,512]), "prescaleSize")
-        np.testing.assert_array_equal(tileDim, np.array([1,2]), "tileDim")
+        self.assertEqual(prescaleSize, [256,512], "prescaleSize")
+        self.assertEqual(tileDim, [1,2], "tileDim")
 
     def test_scale1_prescale_even(self):
-        size = np.array([250, 500])
-        pxOffset = np.array([6, 12])
+        size = [250, 500]
+        pxOffset = [6, 12]
         scale = 1
         #
         prescaleSize, tileSizeToImage, tileDim = tileMap.calcCropParams(size, pxOffset, scale)
         #
         self.assertEqual(tileSizeToImage, 256)
-        np.testing.assert_array_equal(prescaleSize, np.array([256,512]), "prescaleSize")
-        np.testing.assert_array_equal(tileDim, np.array([1,2]), "tileDim")
+        self.assertEqual(prescaleSize, [256,512], "prescaleSize")
+        self.assertEqual(tileDim, [1,2], "tileDim")
 
     def test_scale1_prescale_odd(self):
-        size = np.array([256, 512])
-        pxOffset = np.array([10, 20])
+        size = [256, 512]
+        pxOffset = [10, 20]
         scale = 1
         #
         prescaleSize, tileSizeToImage, tileDim = tileMap.calcCropParams(size, pxOffset, scale)
         #
         self.assertEqual(tileSizeToImage, 256)
-        np.testing.assert_array_equal(prescaleSize, np.array([266,532]), "prescaleSize")
-        np.testing.assert_array_equal(tileDim, np.array([2,3]), "tileDim")
+        self.assertEqual(prescaleSize, [266,532], "prescaleSize")
+        self.assertEqual(tileDim, [2,3], "tileDim")
 
     def test_scale2_noprescale_even(self):
-        size = np.array([512, 1024])
-        pxOffset = np.array([0, 0])
+        size = [512, 1024]
+        pxOffset = [0, 0]
         scale = 2
         #
         prescaleSize, tileSizeToImage, tileDim = tileMap.calcCropParams(size, pxOffset, scale)
         #
         self.assertEqual(tileSizeToImage, 512)
-        np.testing.assert_array_equal(prescaleSize, np.array([512,1024]), "prescaleSize")
-        np.testing.assert_array_equal(tileDim, np.array([1,2]), "tileDim")
+        self.assertEqual(prescaleSize, [512,1024], "prescaleSize")
+        self.assertEqual(tileDim, [1,2], "tileDim")
 
     def test_scale2_prescale_even(self):
-        size = np.array([500, 1000])
-        pxOffset = np.array([6, 12])
+        size = [500, 1000]
+        pxOffset = [6, 12]
         scale = 2
         #
         prescaleSize, tileSizeToImage, tileDim = tileMap.calcCropParams(size, pxOffset, scale)
         #
         self.assertEqual(tileSizeToImage, 512)
-        np.testing.assert_array_equal(prescaleSize, np.array([512,1024]), "prescaleSize")
-        np.testing.assert_array_equal(tileDim, np.array([1,2]), "tileDim")
+        self.assertEqual(prescaleSize, [512,1024], "prescaleSize")
+        self.assertEqual(tileDim, [1,2], "tileDim")
 
     def test_scale2_prescale_odd(self):
-        size = np.array([512, 1024])
-        pxOffset = np.array([10, 20])
+        size = [512, 1024]
+        pxOffset = [10, 20]
         scale = 2
         #
         prescaleSize, tileSizeToImage, tileDim = tileMap.calcCropParams(size, pxOffset, scale)
         #
         self.assertEqual(tileSizeToImage, 512)
-        np.testing.assert_array_equal(prescaleSize, np.array([532,1064]), "prescaleSize")
-        np.testing.assert_array_equal(tileDim, np.array([2,3]), "tileDim")
+        self.assertEqual(prescaleSize, [532,1064], "prescaleSize")
+        self.assertEqual(tileDim, [2,3], "tileDim")
 
 class TestGetRelativeScale(unittest.TestCase):
     def test_self(self):
@@ -154,7 +153,7 @@ class TestCrop(unittest.TestCase):
         img = 'fakeimg.png'
         outImg = 'temp/zoom2-%d.png'
         background = tileMap.FillBackground
-        preSize = np.array([512,513])
+        preSize = [512,513]
         tileMap.crop(img, outImg, preSize, 1024)
         check_call.assert_called_with([
             'convert', img,
@@ -178,8 +177,8 @@ class TestCrop(unittest.TestCase):
 class TestMoveToDirs(unittest.TestCase):
     @patch('tileMap.os')
     def test_makeDir(self, mockOs):
-        dim = np.array([1, 1])
-        offset = np.array([0, 0])
+        dim = [1, 1]
+        offset = [0, 0]
         mockOs.path.exists.return_value = False
         tileMap.moveToDirs(dim, offset, 2)
         mockOs.path.exists.assert_called_with('layers/2')
@@ -187,8 +186,8 @@ class TestMoveToDirs(unittest.TestCase):
 
     @patch('tileMap.os')
     def test_one_noOffset(self, mockOs):
-        dim = np.array([1, 1])
-        offset = np.array([0, 0])
+        dim = [1, 1]
+        offset = [0, 0]
         mockOs.path.exists.return_value = True
         tileMap.moveToDirs(dim, offset, 0)
         mockOs.rename.assert_has_calls([
@@ -197,8 +196,8 @@ class TestMoveToDirs(unittest.TestCase):
 
     @patch('tileMap.os')
     def test_oneLine_noOffset(self, mockOs):
-        dim = np.array([1, 3])
-        offset = np.array([0, 0])
+        dim = [1, 3]
+        offset = [0, 0]
         mockOs.path.exists.return_value = True
         tileMap.moveToDirs(dim, offset, 0)
         mockOs.rename.assert_has_calls([
@@ -209,8 +208,8 @@ class TestMoveToDirs(unittest.TestCase):
 
     @patch('tileMap.os')
     def test_sixLine_noOffset(self, mockOs):
-        dim = np.array([3, 2])
-        offset = np.array([0, 0])
+        dim = [3, 2]
+        offset = [0, 0]
         mockOs.path.exists.return_value = True
         tileMap.moveToDirs(dim, offset, 0)
         mockOs.rename.assert_has_calls([
@@ -224,8 +223,8 @@ class TestMoveToDirs(unittest.TestCase):
 
     @patch('tileMap.os')
     def test_one_PosOffset(self, mockOs):
-        dim = np.array([1, 1])
-        offset = np.array([1, 2])
+        dim = [1, 1]
+        offset = [1, 2]
         mockOs.path.exists.return_value = True
         tileMap.moveToDirs(dim, offset, 0)
         mockOs.rename.assert_has_calls([
@@ -234,8 +233,8 @@ class TestMoveToDirs(unittest.TestCase):
 
     @patch('tileMap.os')
     def test_one_NegOffset(self, mockOs):
-        dim = np.array([1, 1])
-        offset = np.array([-1, 2])
+        dim = [1, 1]
+        offset = [-1, 2]
         mockOs.path.exists.return_value = True
         tileMap.moveToDirs(dim, offset, 0)
         mockOs.rename.assert_has_calls([
@@ -244,8 +243,8 @@ class TestMoveToDirs(unittest.TestCase):
 
     @patch('tileMap.os')
     def test_one_offsetCrossZero(self, mockOs):
-        dim = np.array([2, 2])
-        offset = np.array([-1, -1])
+        dim = [2, 2]
+        offset = [-1, -1]
         mockOs.path.exists.return_value = True
         tileMap.moveToDirs(dim, offset, 0)
         mockOs.rename.assert_has_calls([
