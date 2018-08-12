@@ -40,14 +40,18 @@ def main():
     config = readConfig()
     if not os.path.exists("temp"):
         os.makedirs("temp")
+
+    layerSettings = []
     for f, v in config['maps'].items():
         size = v['size']
         baseZoom = v['baseZoom']
         zoomLevels = v['zoomLevels']
         topLeft = mapCoordToImgCoord(v['topLeft'])
-        print(topLeft)
 
-        for z in getZooms(baseZoom, zoomLevels):
+        bounds = setBounding(size, topLeft, baseZoom)
+        zoomRange = getZooms(baseZoom, zoomLevels)
+        layerSettings.append(organizeLayerSettings(bounds, zoomRange))
+        for z in range(zoomRange[0], zoomRange[1]+1):
             tileOffset, inTileOffsetPx = scaleRelativeToGlobal(topLeft, z)
 
             scaleRelativeToImage = getRelativeScale(z, baseZoom)
@@ -57,10 +61,33 @@ def main():
             imgOut = "temp/zoom{}-%d.png".format(z)
             crop(f, imgOut, resize, rescaleTile)
             moveToDirs(tileDim, tileOffset, z)
+    saveLayerSettings("layers/layers.js", layerSettings)
+
+def saveLayerSettings(fname, layers):
+    js = 'var layers = {};'.format(json.dumps(layers))
+    with open(fname, 'w') as f:
+        f.write(js)
+
+def organizeLayerSettings(bounds, zoomRange):
+    return {
+        'bounds': bounds,
+        'minZoom': zoomRange[0],
+        'maxZoom': zoomRange[1],
+    }
+
+def setBounding(size, topLeft, zoom):
+    s = float(getGlobalScale(zoom))
+    bottomRight = [
+        (size[0] / s) + topLeft[0],
+        (size[1] / s) + topLeft[1],
+    ]
+    return lmap(imgCoordToMapCoord, [topLeft, bottomRight])
 
 # map is LatLng, imgs are x,y with y increasing as it goes down
 def mapCoordToImgCoord(coord):
     return [coord[1], -coord[0]]
+def imgCoordToMapCoord(coord):
+    return [-coord[1], coord[0]]
 
 def scaleRelativeToGlobal(globalOffet, z):
     # rel to layer pixels after tiling (256 size)
@@ -85,7 +112,7 @@ def getRelativeScale(z, baseZoom):
     return getGlobalScale(baseZoom) / getGlobalScale(z)
 
 def getZooms(base, n):
-    return range(base-n+1, base+1)
+    return [base-n+1, base]
 
 def crop(imgIn, imgOut, prescaleSize, tileSizeToImage):
     preSize="{}x{}".format(*prescaleSize)

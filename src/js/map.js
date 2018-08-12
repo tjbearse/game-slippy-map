@@ -35,15 +35,14 @@ L.control.mapCenterCoord({
     position: 'topright',
     onMove: true,
     // TODO make this function list hex names too
-    latLngFormatter: (y,x) => y + ", " + x,
+    latLngFormatter: function(y,x) {
+	z = map.getZoom()
+	return z + ': ' + y + ", " + x;
+    }
 }).addTo(map);
 
-var tileLayer = L.tileLayer('layers/{z}/{x}.{y}.png', {
-    // determined by how much we generate
-    bounds: [[-2*tileSize,0], [0, 2*tileSize]],
-    minZoom: -1,
-    maxZoom: 6,
-    // maxZoom: 4,
-    maxNativeZoom: 5,
-    // minNativeZoom: 0
-}).addTo(map);
+if (layers) {
+    layers.forEach(function (v) {
+	L.tileLayer('layers/{z}/{x}.{y}.png', v).addTo(map);
+    });
+}

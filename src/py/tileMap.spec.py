@@ -139,11 +139,11 @@ class TestGetRelativeScale(unittest.TestCase):
 class TestGetZooms(unittest.TestCase):
     def test_0to2(self):
         l = list(tileMap.getZooms(2, 3))
-        self.assertEqual(l, [0,1,2])
+        self.assertEqual(l, [0,2])
 
     def test_neg1to2(self):
         l = list(tileMap.getZooms(2, 4))
-        self.assertEqual(l, [-1, 0,1,2])
+        self.assertEqual(l, [-1,2])
 
 
 
@@ -253,6 +253,49 @@ class TestMoveToDirs(unittest.TestCase):
             call('temp/zoom0-2.png', 'layers/0/-1.0.png'),
             call('temp/zoom0-3.png', 'layers/0/0.0.png'),
         ], any_order=True)
+
+class TestSetBounding(unittest.TestCase):
+    def test_zoomZero_zero(self):
+        topLeft = [0, 0]
+        size = [256, 512]
+        a, b = tileMap.setBounding(size, topLeft, 0)
+        self.assertEqual(a, [0,0], "a")
+        self.assertEqual(b, [-512,256], "b")
+
+    def test_zoomZero_pos(self):
+        topLeft = [1024, 2048]
+        size = [256, 512]
+        a, b = tileMap.setBounding(size, topLeft, 0)
+        self.assertEqual(a, [-2048,1024], "a")
+        self.assertEqual(b, [-2560,1280], "b")
+
+    def test_zoomZero_neg(self):
+        topLeft = [-256, -512]
+        size = [256, 512]
+        a, b = tileMap.setBounding(size, topLeft, 0)
+        self.assertEqual(a, [512,-256], "a")
+        self.assertEqual(b, [0,0], "b")
+
+    def test_zoom1_zero(self):
+        topLeft = [0, 0]
+        size = [256, 512]
+        a, b = tileMap.setBounding(size, topLeft, 1)
+        self.assertEqual(a, [0,0], "a")
+        self.assertEqual(b, [-256,128], "b")
+
+    def test_zoom1_pos(self):
+        topLeft = [256, 512]
+        size = [256, 512]
+        a, b = tileMap.setBounding(size, topLeft, 1)
+        self.assertEqual(a, [-512,256], "a")
+        self.assertEqual(b, [-768,384], "b")
+
+    def test_zoom1_neg(self):
+        topLeft = [-256, -512]
+        size = [256, 512]
+        a, b = tileMap.setBounding(size, topLeft, 1)
+        self.assertEqual(a, [512,-256], "a")
+        self.assertEqual(b, [256,-128], "b")
 
 if __name__ == '__main__':
     unittest.main()
