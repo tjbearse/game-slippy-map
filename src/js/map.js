@@ -31,16 +31,13 @@ var map = L.map('map', {
     crs: MySimple,
 }).setView([-1*tileSize, 1*tileSize], 0);
 
-/*
 L.control.mapCenterCoord({
     position: 'topright',
     onMove: true,
     // TODO make this function list hex names too
     latLngFormatter: (y,x) => y + ", " + x,
 }).addTo(map);
-*/
 
-var imgUrl = 'tile.png';
 var tileLayer = L.tileLayer('layers/{z}/{x}.{y}.png', {
     // determined by how much we generate
     bounds: [[-2*tileSize,0], [0, 2*tileSize]],

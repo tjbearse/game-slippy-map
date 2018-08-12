@@ -1,4 +1,6 @@
 FROM mhart/alpine-node:10 as node
+RUN apk add --no-cache git
+
 COPY package.json .
 RUN yarn install
 

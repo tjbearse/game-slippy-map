@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "Leaflet.MapCenterCoord": "https://github.com/xguaita/Leaflet.MapCenterCoord",
     "leaflet": "^1.3.3"
   }
 }
