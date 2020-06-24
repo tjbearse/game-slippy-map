@@ -10,7 +10,7 @@
             "size": [1024, 2048],
             "baseZoom": 9,
             "zoomLevels": 5,
-            "topLeft": [-256, 256]
+            "topLeft": [-297, 288]
         }
     }
 }

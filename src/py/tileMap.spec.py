@@ -297,5 +297,38 @@ class TestSetBounding(unittest.TestCase):
         self.assertEqual(a, [512,-256], "a")
         self.assertEqual(b, [256,-128], "b")
 
+class TestGetDynamicScale(unittest.TestCase):
+    def test_single_exp(self):
+        zooms = [
+            (lambda x:2**x, 19)
+        ]
+        key = {
+            0: 1,
+            1: 2,
+            2: 4,
+            5: 32
+        }
+        for z, v in key.items():
+            with self.subTest(z=z):
+                s = tileMap.getDynamicScale(z, zooms)
+                self.assertEqual(s, v)
+
+    def test_ladder(self):
+        zooms = [
+            (lambda x:2**x, 2),
+            (lambda x:2**(2*x), 19)
+        ]
+        key = {
+            0: 1,
+            1: 2,
+            2: 4,
+            3: 16,
+            4: 64,
+        }
+        for z, v in key.items():
+            with self.subTest(z=z):
+                s = tileMap.getDynamicScale(z, zooms)
+                self.assertEqual(s, v)
+
 if __name__ == '__main__':
     unittest.main()

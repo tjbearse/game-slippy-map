@@ -8,26 +8,6 @@ import sys
 TileSize=256
 FillBackground='rgba(0,0,0,0)'
 
-config = {
-    "zoom": {
-        # This is our current scale.
-        # Consider
-        #   - offset zooms from zero to leave room above? Maybe not an issue if config is nice
-        #   - reconfigure numbers to increase the size of the coordinate space (make zero < 1:1). This would make it coordinates on lower layers less fractional.
-        # zoom: scale # tile width ft
-        -1: 2**(-2),  # 512k  (hexMap native)
-        0: 1,         # 256k  (hexMap) move to native?
-        1: 2**2,      # 128k  (hexMap) move to native?
-        2: 2**(2*2),  # 64k   (hexMap original)
-        3: 2**(2*3),  # 16k   (hexMap native)
-
-        # 4: 2**(2*4),# 8k
-        # 5: 2**(2*5),# 2k
-        # 6: 2**(2*6),# 500
-        # 7: 2**(2*7),# 125
-    },
-}
-
 """
 config details:
     size:	w,h of the image in pixels
@@ -100,6 +80,23 @@ def scaleRelativeToGlobal(globalOffet, z):
 # this number times a global coordinate should give a pixel coordinate
 def getGlobalScale(zoom):
     return 2.0**(zoom)
+
+def getDynamicScale(zoom, zooms):
+    z = 0
+    s = 1
+    zooms = iter(zooms)
+    while True:
+        fn, upperBound = next(zooms)
+        if upperBound >= zoom:
+            s *= fn(zoom - z)
+            return s
+        else:
+            diff = upperBound - z
+            z += diff
+            s *= fn(diff)
+
+            
+    
 
 def calcCropParams(size, inTileOffsetPx, scaleRelativeToImage):
     topLeftExtraToImage = lmap(lambda x:x * scaleRelativeToImage, inTileOffsetPx)
